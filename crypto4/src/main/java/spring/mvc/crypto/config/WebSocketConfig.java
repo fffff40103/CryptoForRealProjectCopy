@@ -7,6 +7,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 @Configuration//一個spring的配置項
 @EnableWebSocket//標註讓websocket支持
+//這是註冊websocket處理器的地方
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
