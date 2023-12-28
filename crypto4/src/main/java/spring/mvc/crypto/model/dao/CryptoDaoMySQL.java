@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import spring.mvc.crypto.model.entity.CryptoCurrency;
 import spring.mvc.crypto.model.entity.User;
 
 @Repository
@@ -64,5 +65,46 @@ public class CryptoDaoMySQL implements CryptoDao {
 			return Optional.empty();
 		}
 	}
+	
+	// 貨幣資訊Crypto:
+	@Override
+	//1.查詢所有貨幣(多筆)
+	public List<CryptoCurrency> findAllCryptos() {
+		String sql="select cryptoId,name,price,value,rate from cryptoInfo";
+		return jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CryptoCurrency.class));
+	}
+	
+    //  2.新增貨幣
+	@Override
+	public void addCrypto(CryptoCurrency crypto) {
+		String sql="insert into cryptoInfo(name,price,value,rate) values(?,?,?,?)";
+		jdbcTemplate.update(sql,crypto.getName(),crypto.getPrice(),crypto.getValue(),crypto.getRate());
+		
+	}
+	
+    //  3.根據貨幣編號尋找該貨幣
+	@Override
+	public Optional<CryptoCurrency> findCryptoByCryptoId(Integer cryptoId) {
+		String sql="select cryptoId,name,price,value,rate from cryptoInfo where cryptoId=?";
+		try {
+			CryptoCurrency crypto = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(CryptoCurrency.class), cryptoId);
+			return Optional.ofNullable(crypto);
+		} catch (EmptyResultDataAccessException e) {
+			return Optional.empty();
+		}
+	}
+	
+	// 4.更新所有貨幣的資訊
+	@Override
+	public boolean updateCryptos(List<CryptoCurrency> cryptos) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
+	
+	
+	
+	
 
 }

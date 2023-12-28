@@ -2,7 +2,7 @@ package spring.mvc.crypto.model.entity;
 
 public class CryptoCurrency {
 		
-		private Integer number;//貨幣代號
+		private Integer cryptoId;//貨幣代號
 	 	private String name;//貨幣名稱
 	    private Float price;//貨幣價格
 		private String value;//貨幣市值
@@ -18,18 +18,18 @@ public class CryptoCurrency {
 	    	this.value=value;//貨幣市值
 	    	this.rate=rate;
 	    }
-	    public CryptoCurrency(Integer number,String name,Float price,String value,Float rate) {
-	    	this.number=number;//貨幣代號，這裡用auto_increment
+	    public CryptoCurrency(Integer cryptoId,String name,Float price,String value,Float rate) {
+	    	this.cryptoId=cryptoId;//貨幣代號，這裡用auto_increment
 	    	this.name=name;//貨幣名稱
 	    	this.price=price;//貨幣價格
 	    	this.value=value;//貨幣市值
 	    	this.rate=rate;
 	    }
-		public Integer getNumber() {
-			return number;
+		public Integer getCryptoId() {
+			return cryptoId;
 		}
-		public void setNumber(Integer number) {
-			this.number = number;
+		public void setCryptoId(Integer cryptoId) {
+			this.cryptoId = cryptoId;
 		}
 		public String getName() {
 			return name;

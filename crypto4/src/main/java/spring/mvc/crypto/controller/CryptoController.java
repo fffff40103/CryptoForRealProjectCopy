@@ -155,11 +155,13 @@ public class CryptoController {
 		return "market";
 	}
 	
+	//定期去網站爬最新資料，把最新資料更新到資料庫
 	@GetMapping("/getCryptoInfo")
     public String getCryptoData(Model model) throws IOException {
-        List<CryptoCurrency> cryptoCurrencies = service.crawlCryptoData();
+		//這樣爬到網站最新資訊
+        List<CryptoCurrency> cryptoCurrencies = dao.findAllCryptos();
         model.addAttribute("cryptoCurrencies", cryptoCurrencies);
-        return "cryptoView";
+        return "market";
     }
 	
 }

@@ -1,4 +1,4 @@
-package com.example.handler;
+package spring.mvc.crypto.handler;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,22 +8,28 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 
-import com.example.dao.SemiProductStockDaoImpl;
-import com.example.entity.SemiProductStock;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-@Component("serverWebSocketHandler")
-public class ServerWebSocketHandler extends TextWebSocketHandler {
+import spring.mvc.crypto.model.dao.CryptoDao;
+import spring.mvc.crypto.model.entity.CryptoCurrency;
+import spring.mvc.crypto.service.CryptoService;
 
+
+@Component("myWebSocketHandler")
+public class MyWebSocketHandler extends TextWebSocketHandler {
+	
 	enum Prop {
 
 		TYPE("type"), CONTENT("content");
@@ -39,31 +45,32 @@ public class ServerWebSocketHandler extends TextWebSocketHandler {
 		}
 
 	}
-
+	
+	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
 	private final Set<WebSocketSession> sessions = new CopyOnWriteArraySet<>();
-
 	private final Gson gson = new Gson();
-
+    
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		logger.info("Server connection opened");
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        //當連線建立時傳送的消息
+    	logger.info("Server connection opened");
 		sessions.add(session);
 		JsonObject messageObject = getJsonMessage("response", "one-time message from server");
 		logger.info("Server sends: {}", messageObject);
 		session.sendMessage(new TextMessage(gson.toJson(messageObject)));
-	}
-
+       
+    }
+	
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		logger.info("Server connection closed: {}", status);
 		sessions.remove(session);
 	}
 
-	@Override
+    @Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		String request = message.getPayload();
+    	String request = message.getPayload();
 		logger.info("Server received: {}", request);
 
 		JsonObject messageObject = getJsonMessage("response",
@@ -72,46 +79,41 @@ public class ServerWebSocketHandler extends TextWebSocketHandler {
 		session.sendMessage(new TextMessage(gson.toJson(messageObject)));
 	}
 
-	@Override
+    @Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) {
 		logger.info("Server transport error: {}", exception.getMessage());
 	}
-
-	private void sendMessageToClient(WebSocketSession session, String message) throws IOException {
+    
+    private void sendMessageToClient(WebSocketSession session, String message) throws IOException {
 		JsonObject messageObject = getJsonMessage("response", message);
 		session.sendMessage(new TextMessage(gson.toJson(messageObject)));
 	}
-
-	private void sendMessageToAllClients(String message) throws IOException {
+    
+    private void sendMessageToAllClients(String message) throws IOException {
 		for (WebSocketSession session : sessions) {
 			sendMessageToClient(session, message);
 		}
 	}
-
-	private JsonObject getJsonMessage(String type, Object content) {
+    
+    private JsonObject getJsonMessage(String type, Object content) {
 		JsonObject messageObject = new JsonObject();
 		messageObject.addProperty(Prop.TYPE.getName(), type);
 		messageObject.addProperty(Prop.CONTENT.getName(), content.toString());
 		return messageObject;
 	}
-
-	/**
-	 * 排程程式
+    
+    /**
+	 * 排程程式，從資料庫取出資料，傳送給前端
 	 */
-	@Autowired
-	private SemiProductStockDaoImpl semiProductStockDao;
+    @Autowired
+    private CryptoDao cryptoDaoMysql;
+    
+    @Scheduled(fixedRate = 10 * 1000)
+    public void sendPeriodicMessages()throws IOException{
+    	List<CryptoCurrency> cryptoCurrencies = cryptoDaoMysql.findAllCryptos();
+    }
 
-	@Scheduled(fixedRate = 10 * 1000) // 每 10 秒執行一次
-	public void sendPeriodicMessages() throws IOException {
-		List<SemiProductStock> semiProductStocks = semiProductStockDao.findLatestSemiProductStock();
-		for (WebSocketSession session : sessions) {
-			if (session.isOpen()) {
-				JsonObject stockObject = new JsonObject();
-				stockObject.addProperty(Prop.TYPE.getName(), "stocks");
-				stockObject.add(Prop.CONTENT.getName(), gson.toJsonTree(semiProductStocks));
-				logger.info("Server sends: {}", stockObject);
-				session.sendMessage(new TextMessage(gson.toJson(stockObject)));
-			}
-		}
-	}
+    
+
+    
 }

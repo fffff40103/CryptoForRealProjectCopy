@@ -1,18 +1,47 @@
 package spring.mvc.crypto.controller;
 
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import spring.mvc.crypto.handler.MyWebSocketHandler;
+
 
 /*
  * 用來處理從客戶端傳送過來的請求，
- * @MessageMapping("/crypto-updates")這段是客換端發送請求時傳送過來的網址
- * @SendTo("/topic/cryptoUpdates")當server接收到請求時，會透過這個網址發送response回去給客戶端
  * */
 @Controller
+@RequestMapping("/crypto")
 public class WebSocketController {
 		
-	    /*
-	    @MessageMapping("/crypto-updates")
-	    @SendTo("/topic/cryptoUpdates")
-	    public String handleCryptoUpdates
-		*/
+		@Autowired()
+		MyWebSocketHandler myWebSocketHandler;
+	    
+		
+		@RequestMapping("/websocket")
+	    @ResponseBody
+	    public String handleWebSocketMessage(@RequestParam("message") String message, WebSocketSession session) {
+			// 處理WebSocket訊息
+	        String response = "WebSocket Message: " + message;
+	        
+	     // 主動發送消息到指定目的地
+	       
+	        try {
+				myWebSocketHandler.sendPeriodicMessages();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        
+	        return response;
+	       
+		}
+		
 }
