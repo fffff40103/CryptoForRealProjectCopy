@@ -155,18 +155,11 @@ public class CryptoController {
 		return "market";
 	}
 	
-	//取得加密貨幣資訊服務
-	@GetMapping("/info")
-	@ResponseBody
-	public String info() {
-		try {
-			List<CryptoCurrency> cryptos=service.crawlCryptoData();
-			cryptos.stream().forEach(crypto->System.out.println(crypto));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return "ddd";
-	}
+	@GetMapping("/getCryptoInfo")
+    public String getCryptoData(Model model) throws IOException {
+        List<CryptoCurrency> cryptoCurrencies = service.crawlCryptoData();
+        model.addAttribute("cryptoCurrencies", cryptoCurrencies);
+        return "cryptoView";
+    }
 	
 }

@@ -1,5 +1,6 @@
 package spring.mvc.crypto.scheduler;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +14,16 @@ import spring.mvc.crypto.service.WebSocketService;
 //每5分鐘執行一次，爬蟲加密貨幣數據並通過 WebSocket 傳送給前端
 public class CryptoDataScheduler {
 	
-	
-	
 	@Autowired
-	private final CryptoService cryptoService;
-    private final WebSocketService webSocketService;
+	private  CryptoService cryptoService;
+	@Autowired
+    private  WebSocketService webSocketService;
 
-    public CryptoDataScheduler(CryptoService cryptoService, WebSocketService webSocketService) {
-        this.cryptoService = cryptoService;
-        this.webSocketService = webSocketService;
-    }
 
     @Scheduled(fixedRate = 300000)  // 每5分鐘執行一次
-    public void crawlCryptoDataAndSendToWebSocket() {
-        //List<CryptoCurrency> cryptoCurrencies = cryptoService.crawlCryptoData();
-        //webSocketService.sendCryptoData(cryptoCurrencies);
+    public void crawlCryptoDataAndSendToWebSocket() throws IOException {
+        List<CryptoCurrency> cryptoCurrencies = cryptoService.crawlCryptoData();
+        webSocketService.sendCryptoData(cryptoCurrencies);
     }
 	
 	
