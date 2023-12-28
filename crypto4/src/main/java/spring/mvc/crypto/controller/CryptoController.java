@@ -1,5 +1,6 @@
 package spring.mvc.crypto.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import spring.mvc.crypto.model.dao.CryptoDao;
+import spring.mvc.crypto.model.entity.CryptoCurrency;
 import spring.mvc.crypto.model.entity.User;
+import spring.mvc.crypto.service.CryptoService;
 
 @Controller
 @RequestMapping("/crypto")
@@ -29,6 +32,8 @@ public class CryptoController {
 	@Autowired
 	private CryptoDao dao;
 	
+	@Autowired
+	private CryptoService service;
 	
 
 	//登入頁面
@@ -148,6 +153,20 @@ public class CryptoController {
 	@GetMapping("/market")
 	public String market() {
 		return "market";
+	}
+	
+	//取得加密貨幣資訊服務
+	@GetMapping("/info")
+	@ResponseBody
+	public String info() {
+		try {
+			List<CryptoCurrency> cryptos=service.crawlCryptoData();
+			cryptos.stream().forEach(crypto->System.out.println(crypto));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "ddd";
 	}
 	
 }
